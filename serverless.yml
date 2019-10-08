@@ -1,0 +1,25 @@
+# serverless.yml
+plugins:
+  - serverless-offline
+service: apollo-lambda
+provider:
+  name: aws
+  runtime: nodejs8.10
+  environment: 
+    MONGO_URI: mongodb+srv://readonly:4r!I5CcOyPrO@cluster0-ypzjs.mongodb.net/gtfs?retryWrites=true&w=majority
+package:
+ include:
+   - src/**
+functions:
+  graphql:
+    # this is formatted as <FILENAME>.<HANDLER>
+    handler: graphql.graphqlHandler
+    events:
+    - http:
+        path: graphql
+        method: post
+        cors: true
+    - http:
+        path: graphql
+        method: get
+        cors: true
