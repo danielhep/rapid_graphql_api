@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "apollo-server-lambda": "^2.9.5",
+    "cachegoose": "^8.0.0",
     "graphql": "^14.5.8",
     "graphql-iso-date": "^3.6.1",
     "gtfs": "^1.9.1",

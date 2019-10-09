@@ -10,11 +10,14 @@ const Calendars = require('gtfs/models/gtfs/calendar')
 const CalendarDates = require('gtfs/models/gtfs/calendar-date')
 const Agencies = require('gtfs/models/gtfs/agency')
 
+var cachegoose = require('cachegoose')
+
 let conn = null
 const mongoURI = process.env.MONGO_URI
 
 module.exports.connectToDatabase = async function (context) {
   console.log('Creating connection.')
+  cachegoose(mongoose)
   if (conn == null) {
     conn = await mongoose.connect(mongoURI, {
       // Buffering means mongoose will queue up operations if it gets
@@ -98,7 +101,7 @@ const getTripsFromRouteNames = async (serviceIds, routes, agencyKey) => {
       service_id: { $in: serviceIds },
       agency_key: agencyKey
     }, 'trip_id route_id service_id trip_headsign'
-    ).exec()
+    ).cache().exec()
   }
 
   return trips
@@ -125,11 +128,8 @@ const getRoutesFromIDs = async (routeIDs = [], agencyKey) => {
 }
 
 module.exports.getStopTimes = async (obj, { routes, date }, context) => {
-  console.log(date)
   const serviceCodes = await getServiceCodesForDate(DateTime.fromJSDate(date), obj.agency_key)
   const routesObjs = await getRoutesFromIDs(routes, obj.agency_key)
-  console.log(routesObjs)
-  console.log(serviceCodes)
   const trips = await getTripsFromRouteNames(serviceCodes, routesObjs, obj.agency_key)
 
   const query = {

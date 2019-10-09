@@ -10,6 +10,16 @@ const typeDefs = gql`
     long: Float
   }
   
+  type Route {
+    _id: ID
+    route_long_name: String
+    route_type: Int
+    route_color: String
+    route_text_color: String
+    route_id: String
+    route_short_name: String
+  }
+
   type Agency {
     agency_name: String
     agency_phone: String
@@ -17,6 +27,8 @@ const typeDefs = gql`
     agency_key: String
     agency_center: Location
     stops: [Stop]
+    routes: [Route]
+    stop(id: ID!): Stop
   }
 
   type Stop {
@@ -26,7 +38,7 @@ const typeDefs = gql`
     stop_name: String
     stop_id: String
     zone_id: String
-    stop_times(date: Date, routes: [Int]): [StopTime]
+    stop_times(date: Date, routes: [ID]): [StopTime]
   }
 
   type StopTime {
@@ -41,12 +53,12 @@ const typeDefs = gql`
   type Trip {
     trip_id: ID
     trip_headsign: String
+    route: Route
   }
 
   type Query {
     agencies: [Agency]
     agency(agency_key: String): Agency
-    stop(id: ID!): Stop
   }
 `
 
@@ -55,22 +67,26 @@ const typeDefs = gql`
 const resolvers = {
   Date: GraphQLDate,
   Query: {
-    agencies: (obj, args, context) => context.model('Agencies').find({}).exec(),
-    agency: ({ agency_key }, args, context) => context.model('Agencies').findOne({ agency_key }).exec(),
-    stop: (_, args, context) => context.model('Stops').findOne({ stop_id: args.id })
+    agencies: (obj, args, context) => context.model('Agencies').find({}).cache().exec(),
+    agency: (obj, { agency_key }, context) => context.model('Agencies').findOne({ agency_key }).cache().exec()
   },
   Agency: {
+    routes: ({ agency_key }, args, context) => context.model('Routes').find({ agency_key }).cache(),
+    stop: (_, args, context) => context.model('Stops').findOne({ stop_id: args.id }),
     agency_center: ({ agency_center }) => {
       return {
         lat: agency_center[0],
         long: agency_center[1]
       }
     },
-    stops: ({ agency_key }, args, context) => context.model('Stops').find({ agency_key }).exec()
+    stops: ({ agency_key }, args, context) => context.model('Stops').find({ agency_key }).cache().exec()
   },
   Stop: { stop_times: db.getStopTimes },
   StopTime: {
-    trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key })
+    trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key }).cache().exec()
+  },
+  Trip: {
+    route: ({ route_id, agency_key }, args, context) => context.model('Routes').findOne({ route_id, agency_key }).cache().exec()
   }
 }
 
