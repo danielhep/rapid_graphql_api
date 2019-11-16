@@ -1,6 +1,6 @@
 const { ApolloServer, gql } = require('apollo-server-lambda')
 const { GraphQLDate } = require('graphql-iso-date')
-const db = require('./src/db.js')
+const db = require('./db')
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
   scalar Date
@@ -24,7 +24,6 @@ const typeDefs = gql`
     agency_name: String
     agency_phone: String
     agency_id: ID
-    agency_key: String
     agency_center: Location
     stops: [Stop]
     routes: [Route]
@@ -58,7 +57,7 @@ const typeDefs = gql`
 
   type Query {
     agencies: [Agency]
-    agency(agency_key: String): Agency
+    agency(agency_id: String): Agency
   }
 `
 
@@ -67,11 +66,13 @@ const typeDefs = gql`
 const resolvers = {
   Date: GraphQLDate,
   Query: {
-    agencies: (obj, args, context) => context.model('Agencies').find({}).cache().exec(),
-    agency: (obj, { agency_key }, context) => context.model('Agencies').findOne({ agency_key }).cache().exec()
+    agencies: require('./database/agency').getAgencies,
+    agency: require('./database/agency').getAgency,
+    feeds: require('./database/feed').getFeeds,
+    feed: require('./database/feed').getFeed
   },
   Agency: {
-    routes: ({ agency_key }, args, context) => context.model('Routes').find({ agency_key }).cache(),
+    routes: require('./database/route').getRoutes,
     stop: (_, args, context) => context.model('Stops').findOne({ stop_id: args.id }),
     agency_center: ({ agency_center }) => {
       return {
@@ -79,7 +80,7 @@ const resolvers = {
         long: agency_center[1]
       }
     },
-    stops: ({ agency_key }, args, context) => context.model('Stops').find({ agency_key }).cache().exec()
+    stops: require('./database/stop').getStops
   },
   Stop: { stop_times: db.getStopTimes },
   StopTime: {
@@ -90,9 +91,11 @@ const resolvers = {
   }
 }
 
-const context = db.connectToDatabase
+const knex = require('./database')
+const context = { knex }
 const server = new ApolloServer({ typeDefs, resolvers, context })
-
+console.debug('hello debug')
+console.log('hello log')
 exports.graphqlHandler = server.createHandler({
   cors: {
     origin: '*',

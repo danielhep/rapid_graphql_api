@@ -8,6 +8,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "FlacheQL": "https://github.com/FlacheQL/FlacheQL",
     "apollo-server-lambda": "^2.9.5",
     "cachegoose": "^8.0.0",
     "graphql": "^14.5.8",
