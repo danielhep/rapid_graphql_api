@@ -103,7 +103,8 @@ const resolvers = {
   Stop: { stop_times: require('./database/stop').getStopTimes },
   StopTime: {
     trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key }).cache().exec(),
-    departure_time: require('./database/stoptime').getTimestampFromInterval
+    departure_time: require('./database/stoptime').getLuxonDurationFromInterval('departure'),
+    arrival_time: require('./database/stoptime').getLuxonDurationFromInterval('arrival')
   },
   Trip: {
     route: ({ route_id, agency_key }, args, context) => context.model('Routes').findOne({ route_id, agency_key }).cache().exec()
