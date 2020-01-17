@@ -4,12 +4,22 @@ const db = require('./db')
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
   scalar Date
+  scalar Time
 
   type Location {
     lat: Float
     long: Float
   }
   
+  type Feed {
+    feed_index: Int
+    feed_publisher_name: String
+    feed_publisher_url: String
+    agencies: [Agency]
+    stops: [Stop]
+    routes: [Route]
+  }
+
   type Route {
     _id: ID
     route_long_name: String
@@ -25,9 +35,10 @@ const typeDefs = gql`
     agency_phone: String
     agency_id: ID
     agency_center: Location
+    feed_index: Int
     stops: [Stop]
     routes: [Route]
-    stop(id: ID!): Stop
+    stop(stop_id: ID!): Stop
   }
 
   type Stop {
@@ -42,8 +53,8 @@ const typeDefs = gql`
 
   type StopTime {
     trip: Trip
-    arrival_time: String
-    departure_time: String
+    arrival_time: Time
+    departure_time: Time
     stop_id: ID
     stop_sequence: Int
     stop_headsign: String
@@ -56,8 +67,10 @@ const typeDefs = gql`
   }
 
   type Query {
+    feed(feed_index: Int): Feed
+    feeds: [Feed]
     agencies: [Agency]
-    agency(agency_id: String): Agency
+    agency(agency_id: ID!, feed_index: ID!): Agency
   }
 `
 
@@ -69,11 +82,16 @@ const resolvers = {
     agencies: require('./database/agency').getAgencies,
     agency: require('./database/agency').getAgency,
     feeds: require('./database/feed').getFeeds,
-    feed: require('./database/feed').getFeed
+    feed: (obj, { feed_index }) => { feed_index }
+  },
+  Feed: {
+    agencies: require('./database/agency').getAgencies,
+    routes: require('./database/route').getRoutes,
+    stops: require('./database/stop').getStops
   },
   Agency: {
     routes: require('./database/route').getRoutes,
-    stop: (_, args, context) => context.model('Stops').findOne({ stop_id: args.id }),
+    stop: require('./database/stop').getStop,
     agency_center: ({ agency_center }) => {
       return {
         lat: agency_center[0],
@@ -82,9 +100,10 @@ const resolvers = {
     },
     stops: require('./database/stop').getStops
   },
-  Stop: { stop_times: db.getStopTimes },
+  Stop: { stop_times: require('./database/stop').getStopTimes },
   StopTime: {
-    trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key }).cache().exec()
+    trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key }).cache().exec(),
+    departure_time: require('./database/stoptime').getTimestampFromInterval
   },
   Trip: {
     route: ({ route_id, agency_key }, args, context) => context.model('Routes').findOne({ route_id, agency_key }).cache().exec()
@@ -94,8 +113,6 @@ const resolvers = {
 const knex = require('./database')
 const context = { knex }
 const server = new ApolloServer({ typeDefs, resolvers, context })
-console.debug('hello debug')
-console.log('hello log')
 exports.graphqlHandler = server.createHandler({
   cors: {
     origin: '*',
