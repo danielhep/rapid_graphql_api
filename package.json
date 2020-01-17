@@ -17,8 +17,8 @@
     "knex": "^0.20.2",
     "lodash": "^4.17.15",
     "luxon": "^1.19.3",
-    "mongoose": "^5.7.3",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "mongoose": "^5.7.5"
   },
   "devDependencies": {
     "serverless": "^1.53.0",
