@@ -28,6 +28,8 @@ const typeDefs = gql`
     route_text_color: String
     route_id: String
     route_short_name: String
+    stops: [Stop]
+    trips: [Trip]
   }
 
   type Agency {
@@ -102,12 +104,12 @@ const resolvers = {
   },
   Stop: { stop_times: require('./database/stop').getStopTimes },
   StopTime: {
-    trip: ({ trip_id, agency_key }, args, context) => context.model('Trips').findOne({ trip_id, agency_key }).cache().exec(),
+    trip: require('./database/stoptime').getTripFromStopTime,
     departure_time: require('./database/stoptime').getLuxonDurationFromInterval('departure'),
     arrival_time: require('./database/stoptime').getLuxonDurationFromInterval('arrival')
   },
   Trip: {
-    route: ({ route_id, agency_key }, args, context) => context.model('Routes').findOne({ route_id, agency_key }).cache().exec()
+    route: require('./database/trip').getRouteFromTrip
   }
 }
 

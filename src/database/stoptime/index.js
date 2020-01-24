@@ -17,3 +17,12 @@ exports.getLuxonDurationFromInterval = (arrivalOrDeparture) => function (obj, ar
 
   return Duration.fromObject(timeObj)
 }
+
+exports.getTripFromStopTime = async function (obj, args, { knex }) {
+  const where = {
+    trip_id: obj.trip_id,
+    feed_index: obj.feed_index
+  }
+
+  return knex.withSchema('gtfs').select().where(where).from('trips').first()
+}
