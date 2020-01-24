@@ -1,5 +1,6 @@
 # serverless.yml
 plugins:
+  # - serverless-plugin-typescript
   - serverless-offline
 service: apollo-lambda
 provider:

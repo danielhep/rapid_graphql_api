@@ -113,8 +113,8 @@ const resolvers = {
   }
 }
 
-const knex = require('./database')
-const context = { knex }
+const dbConnections = require('./database')
+const context = { knex: dbConnections.knex, slonik: dbConnections.slonik }
 const server = new ApolloServer({ typeDefs, resolvers, context })
 exports.graphqlHandler = server.createHandler({
   cors: {

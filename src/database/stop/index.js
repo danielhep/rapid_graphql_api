@@ -1,3 +1,6 @@
+const { DateTime } = require('luxon')
+const { sql } = require('slonik')
+
 exports.getStops = function (obj, args, { knex }) {
   return knex.withSchema('gtfs').select().from('stops').where({ feed_index: obj.feed_index })
 }
@@ -10,13 +13,28 @@ exports.getStop = async function getStop (obj, args, context) {
 
 // args: routes, date
 // obj: stop
-exports.getStopTimes = async function getStopTimes (obj, args, { knex }) {
-  const where = {
-    stop_id: obj.stop_id,
-    feed_index: obj.feed_index
-  }
+exports.getStopTimes = async function getStopTimes (obj, args, { knex, slonik }) {
+  const datetimeobj = DateTime.fromJSDate(args.date, { zone: 'UTC' })
+  const serviceIDs = await require('../calendar/utils').getServiceIDsFromDate({ date: datetimeobj, feed_index: obj.feed_index, slonik })
 
-  const stopTimes = knex.withSchema('gtfs').select().where(where).from('stop_times')
+  console.log(serviceIDs)
+  // console.log(await slonik.any(sql`
+  //     SELECT * FROM gtfs.trips
+  //     WHERE service_id = ANY(${sql.array(serviceIDs, sql`text[]`)})
+  //     `))
 
+  const stopTimes = await slonik.any(sql`
+    SELECT * FROM gtfs.stop_times
+    WHERE 
+    stop_id = ${obj.stop_id}
+    AND
+    feed_index = ${obj.feed_index}
+    AND
+    trip_id IN
+      (SELECT trip_id FROM gtfs.trips
+      WHERE gtfs.trips.service_id = ANY(${sql.array(serviceIDs, sql`text[]`)})
+      )
+    ORDER BY departure_time
+  `)
   return stopTimes
 }
