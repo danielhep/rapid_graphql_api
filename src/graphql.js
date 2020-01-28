@@ -15,6 +15,7 @@ const typeDefs = gql`
     feed_index: Int
     feed_publisher_name: String
     feed_publisher_url: String
+    feed_location_string: String
     agencies: [Agency]
     stops: [Stop]
     routes: [Route]

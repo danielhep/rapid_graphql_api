@@ -17,12 +17,6 @@ exports.getStopTimes = async function getStopTimes (obj, args, { knex, slonik })
   const datetimeobj = DateTime.fromJSDate(args.date, { zone: 'UTC' })
   const serviceIDs = await require('../calendar/utils').getServiceIDsFromDate({ date: datetimeobj, feed_index: obj.feed_index, slonik })
 
-  console.log(serviceIDs)
-  // console.log(await slonik.any(sql`
-  //     SELECT * FROM gtfs.trips
-  //     WHERE service_id = ANY(${sql.array(serviceIDs, sql`text[]`)})
-  //     `))
-
   const stopTimes = await slonik.any(sql`
     SELECT * FROM gtfs.stop_times
     WHERE 
