@@ -5,6 +5,15 @@ exports.getStops = function (obj, args, { knex }) {
   return knex.withSchema('gtfs').select().from('stops').where({ feed_index: obj.feed_index })
 }
 
+exports.getStopsJson = async function (obj, args, { slonik }) {
+  const stops = await slonik.anyFirst(sql`
+    SELECT ST_AsGeoJSON(stops.*)
+    FROM gtfs.stops
+    WHERE feed_index=${obj.feed_index}
+  `)
+  return stops.map(x => JSON.parse(x))
+}
+
 // Args: stop_id
 // Obj: feed_index,
 exports.getStop = async function getStop (obj, args, context) {
@@ -13,7 +22,7 @@ exports.getStop = async function getStop (obj, args, context) {
 
 // args: routes, date
 // obj: stop
-exports.getStopTimes = async function getStopTimes (obj, args, { knex, slonik }) {
+exports.getStopTimes = async function getStopTimes (obj, args, { slonik }) {
   const datetimeobj = DateTime.fromJSDate(args.date, { zone: 'UTC' })
   const serviceIDs = await require('../calendar/utils').getServiceIDsFromDate({ date: datetimeobj, feed_index: obj.feed_index, slonik })
 

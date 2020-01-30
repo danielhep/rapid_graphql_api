@@ -1,10 +1,11 @@
 const { ApolloServer, gql } = require('apollo-server-lambda')
 const { GraphQLDate } = require('graphql-iso-date')
-const db = require('./db')
 // Construct a schema, using GraphQL schema language
-const typeDefs = gql`
+const typeDefs = {
+  ...gql`
   scalar Date
   scalar Time
+  scalar PointObject
 
   type Location {
     lat: Float
@@ -15,9 +16,10 @@ const typeDefs = gql`
     feed_index: Int
     feed_publisher_name: String
     feed_publisher_url: String
-    feed_location_string: String
+    feed_location_friendly: String
     agencies: [Agency]
     stops: [Stop]
+    stops_json: [PointObject]
     routes: [Route]
   }
 
@@ -54,6 +56,10 @@ const typeDefs = gql`
     stop_times(date: Date, routes: [ID]): [StopTime]
   }
 
+  type StopJson {
+    id: ID
+  }
+
   type StopTime {
     trip: Trip
     arrival_time: Time
@@ -76,6 +82,7 @@ const typeDefs = gql`
     agency(agency_id: ID!, feed_index: ID!): Agency
   }
 `
+}
 
 // Provide resolver functions for your schema fields
 // Resolver functions accept 3 arguments: Previous object, arguments, and context.
@@ -85,12 +92,14 @@ const resolvers = {
     agencies: require('./database/agency').getAgencies,
     agency: require('./database/agency').getAgency,
     feeds: require('./database/feed').getFeeds,
-    feed: (obj, { feed_index }) => { feed_index }
+    feed: require('./database/feed').getFeed
+    // feed: (obj, { feed_index }) => { feed_index }
   },
   Feed: {
     agencies: require('./database/agency').getAgencies,
     routes: require('./database/route').getRoutes,
-    stops: require('./database/stop').getStops
+    stops: require('./database/stop').getStops,
+    stops_json: require('./database/stop').getStopsJson
   },
   Agency: {
     routes: require('./database/route').getRoutes,

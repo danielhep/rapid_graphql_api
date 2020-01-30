@@ -4,14 +4,14 @@ const knex = require('knex')({
     host: '127.0.0.1',
     user: 'danielhep',
     password: 'temppass',
-    database: 'rapid'
+    database: 'headways'
   }
 })
 
 const { Duration } = require('luxon')
 const { createPool, createTypeParserPreset, createIntervalTypeParser } = require('slonik')
 const slonik = createPool(
-  'postgresql://danielhep:temppass@localhost/rapid',
+  'postgresql://danielhep:temppass@localhost/headways',
   {
     typeParsers: [
       ...createTypeParserPreset(),
