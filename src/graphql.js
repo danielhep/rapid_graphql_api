@@ -23,6 +23,7 @@ const typeDefs = {
     stops: [Stop]
     stops_json: [PointObject]
     routes: [Route]
+    stop(stop_id: ID!): Stop
   }
 
   type Route {
@@ -101,7 +102,8 @@ const resolvers = {
     agencies: require('./database/agency').getAgencies,
     routes: require('./database/route').getRoutes,
     stops: require('./database/stop').getStops,
-    stops_json: require('./database/stop').getStopsJson
+    stops_json: require('./database/stop').getStopsJson,
+    stop: require('./database/stop').getStop
   },
   Agency: {
     routes: require('./database/route').getRoutes,
