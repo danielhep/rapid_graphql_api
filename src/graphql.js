@@ -56,7 +56,7 @@ const typeDefs = {
     stop_name: String
     stop_id: String
     zone_id: String
-    stop_times(date: Date, routes: [ID]): [StopTime]
+    stop_times(date: Date!, routes: [ID]): [StopTime]
   }
 
   type StopJson {
