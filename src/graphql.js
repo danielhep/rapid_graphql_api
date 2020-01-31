@@ -17,6 +17,8 @@ const typeDefs = {
     feed_publisher_name: String
     feed_publisher_url: String
     feed_location_friendly: String
+    feed_lat: Float
+    feed_lon: Float
     agencies: [Agency]
     stops: [Stop]
     stops_json: [PointObject]
