@@ -23,7 +23,7 @@ const typeDefs = {
     stops: [Stop]
     stops_json: [PointObject]
     routes: [Route]
-    stop(stop_id: ID!): Stop
+    stop(stop_id: ID): Stop
   }
 
   type Route {
@@ -54,9 +54,10 @@ const typeDefs = {
     loc: Location
     stop_code: String
     stop_name: String
-    stop_id: String
+    stop_id: ID
     zone_id: String
     stop_times(date: Date!, routes: [ID]): [StopTime]
+    routes: [Route]
   }
 
   type StopJson {
@@ -116,7 +117,10 @@ const resolvers = {
     },
     stops: require('./database/stop').getStops
   },
-  Stop: { stop_times: require('./database/stop').getStopTimes },
+  Stop: {
+    stop_times: require('./database/stop').getStopTimes,
+    routes: require('./database/route').getRoutesFromStop
+  },
   StopTime: {
     trip: require('./database/stoptime').getTripFromStopTime,
     departure_time: require('./database/stoptime').getLuxonDurationFromInterval('departure'),
