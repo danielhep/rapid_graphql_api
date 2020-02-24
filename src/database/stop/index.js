@@ -1,4 +1,4 @@
-const { DateTime } = require('luxon')
+const { DateTime, Interval } = require('luxon')
 const { sql } = require('slonik')
 
 exports.getStops = function (obj, args, { knex }) {
@@ -39,5 +39,18 @@ exports.getStopTimes = async function getStopTimes (obj, args, { slonik }) {
       )
     ORDER BY departure_time
   `)
-  return stopTimes
+
+  let prevDepartureTime = null
+  const stopTimesWithPrevStopTime = stopTimes.map((time) => {
+    if (prevDepartureTime) {
+      time.time_since_last = time.departure_time.minus(prevDepartureTime).normalize().toString()
+    } else {
+      time.time_since_last = null
+    }
+
+    prevDepartureTime = time.departure_time
+    return time
+  })
+
+  return stopTimesWithPrevStopTime
 }
