@@ -73,7 +73,8 @@ const typeDefs = {
     stop_sequence: Int
     stop_headsign: String
     is_even_hour: Boolean
-    time_since_last: String
+    time_since_last: Time
+    time_since_last_readable: String
   }
 
   type Trip {
@@ -126,8 +127,9 @@ const resolvers = {
   },
   StopTime: {
     trip: require('./database/stoptime').getTripFromStopTime,
-    departure_time_readable: require('./database/stop/utils.js').getTimeFromInterval('departure_time'),
-    is_even_hour: ({ departure_time }) => !(departure_time.hours % 2)
+    departure_time_readable: require('./database/stop/utils.js').getTimeFromDuration('departure_time'),
+    is_even_hour: ({ departure_time }) => !(departure_time.hours % 2),
+    time_since_last_readable: require('./database/stop/utils.js').getTimeFromDuration('time_since_last')
   },
   Trip: {
     route: require('./database/trip').getRouteFromTrip

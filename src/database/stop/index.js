@@ -43,7 +43,7 @@ exports.getStopTimes = async function getStopTimes (obj, args, { slonik }) {
   let prevDepartureTime = null
   const stopTimesWithPrevStopTime = stopTimes.map((time) => {
     if (prevDepartureTime) {
-      time.time_since_last = time.departure_time.minus(prevDepartureTime).normalize().toString()
+      time.time_since_last = time.departure_time.minus(prevDepartureTime).normalize()
     } else {
       time.time_since_last = null
     }
