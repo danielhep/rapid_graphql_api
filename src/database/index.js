@@ -10,12 +10,14 @@ const knex = require('knex')({
 
 const { Duration } = require('luxon')
 const { createPool, createTypeParserPreset, createIntervalTypeParser } = require('slonik')
+
 const slonik = createPool(
   'postgresql://danielhep:temppass@localhost/headways',
   {
     typeParsers: [
       ...createTypeParserPreset(),
       {
+        // Intervals should map to Luxon durations
         name: 'interval',
         parse: (value) => {
           const seconds = createIntervalTypeParser().parse(value)
