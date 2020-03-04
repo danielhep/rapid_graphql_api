@@ -18,6 +18,5 @@ exports.getRoutesFromStop = async function (obj, args, { slonik }) {
           )
         )
   `)
-  console.log(res)
   return res
 }
