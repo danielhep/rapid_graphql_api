@@ -1,4 +1,4 @@
-const { DateTime, Interval } = require('luxon')
+const { DateTime } = require('luxon')
 const { sql } = require('slonik')
 
 exports.getStops = function (obj, args, { knex }) {
@@ -36,6 +36,7 @@ exports.getStopTimes = async function getStopTimes (obj, args, { slonik }) {
     trip_id IN
       (SELECT trip_id FROM gtfs.trips
       WHERE gtfs.trips.service_id = ANY(${sql.array(serviceIDs, sql`text[]`)})
+      AND gtfs.trips.route_id = ANY(${sql.array(args.routes, sql`text[]`)})
       )
     ORDER BY departure_time
   `)

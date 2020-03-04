@@ -57,7 +57,7 @@ const typeDefs = {
     stop_id: ID
     zone_id: String
     stop_times(date: Date!, routes: [ID]): [StopTime]
-    routes: [Route]
+    routes(date: Date!): [Route]
   }
 
   type StopJson {
@@ -101,7 +101,6 @@ const resolvers = {
     agency: require('./database/agency').getAgency,
     feeds: require('./database/feed').getFeeds,
     feed: require('./database/feed').getFeed
-    // feed: (obj, { feed_index }) => { feed_index }
   },
   Feed: {
     agencies: require('./database/agency').getAgencies,
