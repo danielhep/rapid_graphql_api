@@ -12,7 +12,7 @@
     "cachegoose": "^8.0.0",
     "graphql": "^14.6.0",
     "graphql-iso-date": "^3.6.1",
-    "gtfs": "^1.9.1",
+    "gtfs": "^2.4.2",
     "lodash": "^4.17.15",
     "luxon": "^1.22.0",
     "mongoose": "^5.7.5"
